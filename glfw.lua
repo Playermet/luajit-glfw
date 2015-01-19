@@ -894,6 +894,8 @@ cursor_mt.__index = cursor_mt
 cursor_mt.destroy = mod.destroy_cursor
 
 
+mod.const = const
+
 setmetatable(mod, {
   __call = function(self, name)
     ffi.cdef(header)
