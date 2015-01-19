@@ -1,5 +1,5 @@
 # luajit-glfw
-GLFW binding for LuaJIT.
+GLFW 3.1 binding for LuaJIT.
 
 # Example code
 ```lua
