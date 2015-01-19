@@ -1,6 +1,7 @@
 # luajit-glfw
 GLFW bindind for LuaJIT.
 
+# Example code
 ```lua
 local glfw = require 'glfw' ('glfw3')
 
