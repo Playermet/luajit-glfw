@@ -262,7 +262,7 @@ local function get_const(value)
 
   if vtype == 'string' then
     if const[value] then
-      return value
+      return const[value]
     else
       error('unknown const name', 3)
     end
