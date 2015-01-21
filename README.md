@@ -1,6 +1,21 @@
 # luajit-glfw
 GLFW 3.1 binding for LuaJIT.
 
+# Features
+ - Full support of 3.1.0 API (except native functions)
+```lua
+ -- Optional OO style for monitors, windows, and cursors
+ glfw.show_window(window)
+ -- or
+ window:show()
+```
+```lua
+ -- Constants can be used in two ways
+ glfw.get_key(window, glfw.const.key_space)
+ -- or
+ glfw.get_key(window, 'key_space')
+```
+
 # Example code
 ```lua
 local glfw = require 'glfw' ('glfw3')
