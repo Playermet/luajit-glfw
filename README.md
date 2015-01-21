@@ -54,7 +54,7 @@ Bind is so close to the original API as possible, but some things still differ.
  5. Some methods have shortened names.
  6. Video mode returned as table. This may change in future if necessary.
 
-More examples:
+Examples:
 ```lua
   local version = glfw.get_version()
   print(version.major, version.minor, version.rev)
