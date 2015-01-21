@@ -1,6 +1,3 @@
-# luajit-glfw
-GLFW 3.1 binding for LuaJIT.
-
 # Features
  - Full support of 3.1.0 API (except native functions)
 ```lua
