@@ -413,7 +413,7 @@ function mod.init()
 end
 
 function mod.terminate()
-  return bind.glfwTerminate()
+  bind.glfwTerminate()
 end
 
 function mod.get_version()
