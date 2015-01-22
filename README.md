@@ -1,7 +1,7 @@
 # Features
  - Full support of 3.1.0 API (except native functions)
 ```lua
- -- Optional OO style for monitors, windows, and cursors
+ -- Additional OO style for monitors, windows, and cursors
  glfw.show_window(window)
  -- or
  window:show()
