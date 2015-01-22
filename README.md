@@ -51,8 +51,8 @@ Bind is so close to the original API as possible, but some things still differ.
  2. Arrays of chars replaced by lua string (except joystick buttons).
  3. Arrays of structs replaced by lua tables.
  4. Values returned by reference replaced by returning table or multiple results.
- 5. Some methods have shortened names.
- 6. Video mode returned as table. This may change in future if necessary.
+ 5. Video mode returned as table. This may change in future if necessary.
+ 6. Some methods have shortened names.
 
 Examples:
 ```lua
