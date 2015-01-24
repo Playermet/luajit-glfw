@@ -894,6 +894,9 @@ cursor_mt.__index = cursor_mt
 cursor_mt.destroy = mod.destroy_cursor
 
 
+jit.off(mod.poll_events, true)
+
+
 mod.const = const
 
 setmetatable(mod, {
