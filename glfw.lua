@@ -404,6 +404,7 @@ local header = [[
 ]]
 
 local ffi = require 'ffi'
+local jit = require 'jit'
 
 local bind = {}
 local mod = {}

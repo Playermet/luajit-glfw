@@ -89,3 +89,6 @@ Examples:
   for i = 1, #axes do ... end
 
 ```
+
+# TODO
+ - Wrap callbacks.
