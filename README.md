@@ -46,10 +46,10 @@ glfw.terminate()
 ```
 
 # Differences from the C API
-Bind is so close to the original API as possible, but some things still differ.
+Binding is so close to the original API as possible, but some things still differ.
  1. Names converted to snake_case and lost 'glfw' prefix as not needed.
  2. Arrays of chars replaced by lua string (except joystick buttons).
- 3. Arrays of structs replaced by lua tables.
+ 3. Arrays of structs and strings replaced by lua tables.
  4. Values returned by reference replaced by returning table or multiple results.
  5. Video mode returned as table. This may change in future if necessary.
  6. Some methods have shortened names.
@@ -89,6 +89,3 @@ Examples:
   for i = 1, #axes do ... end
 
 ```
-
-# TODO
- - Wrap callbacks.

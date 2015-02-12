@@ -1,6 +1,10 @@
 -----------------------------------------------------------
---  Bind for GLFW v3.1.0
+--  Binding for GLFW v3.1.0
 -----------------------------------------------------------
+local ffi = require 'ffi'
+local jit = require 'jit'
+
+
 local const = {}
 
 const.version_major    = 3
@@ -403,11 +407,10 @@ local header = [[
   GLFWglproc glfwGetProcAddress(const char* procname);
 ]]
 
-local ffi = require 'ffi'
-local jit = require 'jit'
 
 local bind = {}
 local mod = {}
+local cb = {}
 
 function mod.init()
   return bind.glfwInit()
@@ -438,6 +441,9 @@ function mod.get_version_string()
 end
 
 function mod.set_error_callback(cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.errorfun(cbfun)
+  end
   return bind.glfwSetErrorCallback(cbfun)
 end
 
@@ -480,6 +486,9 @@ function mod.get_monitor_name(monitor)
 end
 
 function mod.set_monitor_callback(cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.monitorfun(cbfun)
+  end
   return bind.glfwSetMonitorCallback(cbfun)
 end
 
@@ -643,30 +652,51 @@ function mod.get_window_user_pointer(window)
 end
 
 function mod.set_window_pos_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.windowposfun(cbfun)
+  end
   return bind.glfwSetWindowPosCallback(window, cbfun)
 end
 
 function mod.set_window_size_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.windowsizefun(cbfun)
+  end
   return bind.glfwSetWindowSizeCallback(window, cbfun)
 end
 
 function mod.set_window_close_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.windowclosefun(cbfun)
+  end
   return bind.glfwSetWindowCloseCallback(window, cbfun)
 end
 
 function mod.set_window_refresh_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.windowrefreshfun(cbfun)
+  end
   return bind.glfwSetWindowRefreshCallback(window, cbfun)
 end
 
 function mod.set_window_focus_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.windowfocusfun(cbfun)
+  end
   return bind.glfwSetWindowFocusCallback(window, cbfun)
 end
 
 function mod.set_window_iconify_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.windowiconifyfun(cbfun)
+  end
   return bind.glfwSetWindowIconifyCallback(window, cbfun)
 end
 
 function mod.set_framebuffer_size_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.framebuffersizefun(cbfun)
+  end
   return bind.glfwSetFramebufferSizeCallback(window, cbfun)
 end
 
@@ -728,34 +758,58 @@ function mod.set_cursor(window, cursor)
 end
 
 function mod.set_key_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.keyfun(cbfun)
+  end
   return bind.glfwSetKeyCallback(window, cbfun)
 end
 
 function mod.set_char_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.charfun(cbfun)
+  end
   return ffi.string(bind.glfwSetCharCallback(window, cbfun))
 end
 
 function mod.set_char_mods_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.charmodsfun(cbfun)
+  end
   return ffi.string(bind.glfwSetCharModsCallback(window, cbfun))
 end
 
 function mod.set_mouse_button_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.mousebuttonfun(cbfun)
+  end
   return bind.glfwSetMouseButtonCallback(window, cbfun)
 end
 
 function mod.set_cursor_pos_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.cursorposfun(cbfun)
+  end
   return bind.glfwSetCursorPosCallback(window, cbfun)
 end
 
 function mod.set_cursor_enter_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.cursorenterfun(cbfun)
+  end
   return bind.glfwSetCursorEnterCallback(window, cbfun)
 end
 
 function mod.set_scroll_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.scrollfun(cbfun)
+  end
   return bind.glfwSetScrollCallback(window, cbfun)
 end
 
 function mod.set_drop_callback(window, cbfun)
+  if type(cbfun) == 'function' then
+    cbfun = cb.dropfun_raw(cbfun)
+  end
   return bind.glfwSetDropCallback(window, cbfun)
 end
 
@@ -831,6 +885,40 @@ function mod.get_proc_address(procname)
   return bind.glfwGetProcAddress(procname)
 end
 
+cb.errorfun_raw       = 'GLFWerrorfun'
+cb.windowposfun       = 'GLFWwindowposfun'
+cb.windowsizefun      = 'GLFWwindowsizefun'
+cb.windowclosefun     = 'GLFWwindowclosefun'
+cb.windowrefreshfun   = 'GLFWwindowrefreshfun'
+cb.windowfocusfun     = 'GLFWwindowfocusfun'
+cb.windowiconifyfun   = 'GLFWwindowiconifyfun'
+cb.framebuffersizefun = 'GLFWframebuffersizefun'
+cb.mousebuttonfun     = 'GLFWmousebuttonfun'
+cb.cursorposfun       = 'GLFWcursorposfun'
+cb.cursorenterfun     = 'GLFWcursorenterfun'
+cb.scrollfun          = 'GLFWscrollfun'
+cb.keyfun             = 'GLFWkeyfun'
+cb.charfun            = 'GLFWcharfun'
+cb.charmodsfun        = 'GLFWcharmodsfun'
+cb.dropfun_raw        = 'GLFWdropfun'
+cb.monitorfun         = 'GLFWmonitorfun'
+
+function cb.errorfun(func)
+  return cb.errorfun_raw(function(error, description)
+    func(error, ffi.string(description))
+  end)
+end
+
+function cb.dropfun(func)
+  return cb.dropfun_raw(function(window, count, names)
+    local t = {}
+    for i = 0, count - 1 do
+      t[#t + 1] = ffi.string(names[i])
+    end
+    func(window, t)
+  end)
+end
+
 
 monitor_mt = {}
 monitor_mt.__index = monitor_mt
@@ -900,6 +988,7 @@ jit.off(mod.wait_events)
 
 
 mod.const = const
+mod.cb = cb
 
 setmetatable(mod, {
   __call = function(self, name)
@@ -910,6 +999,10 @@ setmetatable(mod, {
     ffi.metatype('GLFWmonitor', monitor_mt)
     ffi.metatype('GLFWwindow', window_mt)
     ffi.metatype('GLFWcursor', cursor_mt)
+
+    for k,v in pairs(cb) do
+      cb[k] = type(v) == 'string' and ffi.typeof(v) or v
+    end
 
     return self
   end
