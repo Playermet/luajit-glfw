@@ -26,6 +26,7 @@ end
 local window = glfw.create_window(640, 480, "Hello World")
 if window == 0 then
 	glfw.terminate()
+  return
 end
 
 -- Make the window's context current
