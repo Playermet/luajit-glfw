@@ -1,16 +1,16 @@
 # Features
- - Full support of 3.1.0 API (except native functions)
+ - Full support of 3.1.1 API (except native functions)
 ```lua
  -- Additional OO style for monitors, windows, and cursors
- glfw.show_window(window)
+ glfw.ShowWindow(window)
  -- or
- window:show()
+ window:Show()
 ```
 ```lua
  -- Constants can be used in two ways
- glfw.get_key(window, glfw.const.key_space)
+ glfw.GetKey(window, GLFW.KEY_SPACE)
  -- or
- glfw.get_key(window, 'key_space')
+ glfw.GetKey(window, 'KEY_SPACE')
 ```
 
 # Example code
@@ -18,32 +18,32 @@
 local glfw = require 'glfw' ('glfw3')
 
 -- Initialize the library
-if glfw.init() == 0 then
+if glfw.Init() == 0 then
 	return
 end
 
 -- Create a windowed mode window and its OpenGL context
-local window = glfw.create_window(640, 480, "Hello World")
+local window = glfw.CreateWindow(640, 480, "Hello World")
 if window == 0 then
-	glfw.terminate()
+	glfw.Terminate()
   return
 end
 
 -- Make the window's context current
-window:make_context_current()
+window:MakeContextCurrent()
 
 -- Loop until the user closes the window
-while window:should_close() == 0 do
+while window:ShouldClose() == 0 do
 	-- Render here
 
 	-- Swap front and back buffers
-	window:swap_buffers()
+	window:SwapBuffers()
 
 	-- Poll for and process events
-	glfw.poll_events()
+	glfw.PollEvents()
 end
 
-glfw.terminate()
+glfw.Terminate()
 ```
 
 # Differences from the C API
@@ -57,36 +57,36 @@ Binding is so close to the original API as possible, but some things still diffe
 
 Examples:
 ```lua
-  local version = glfw.get_version()
+  local version = glfw.GetVersion()
   print(version.major, version.minor, version.rev)
 
-  local monitors = glfw.get_monitors()
+  local monitors = glfw.GetMonitors()
   for i = 1, #monitors do ... end
 
-  local x,y = glfw.get_monitor_pos(monitor)
+  local x,y = glfw.GetMonitorPos(monitor)
   local x,y = monitor:get_pos()
 
-  local w,h = glfw.get_monitor_physical_size(monitor)
-  local w,h = monitor:get_physical_size()
+  local w,h = glfw.GetMonitorPhysicalSize(monitor)
+  local w,h = monitor:GetPhysicalSize()
 
-  local modes = glfw.get_video_modes(monitor)
-  local modes = monitor:get_video_modes()
+  local modes = glfw.GetVideoModes(monitor)
+  local modes = monitor:GetVideoModes()
   for i = 1, #modes do ... end
 
-  local mode = glfw.get_video_mode(monitor)
-  local mode = monitor:get_video_mode()
+  local mode = glfw.GetVideoMode(monitor)
+  local mode = monitor:GetVideoMode()
   for k,v in pairs(mode) do
     print(k,v)
   end
 
-  local x,y = glfw.get_window_pos(window)
-  local x,y = window:get_pos()
+  local x,y = glfw.GetWindowPos(window)
+  local x,y = window:GetPos()
 
-  local fsize = glfw.get_window_frame_size(window)
-  local fsize = window:get_frame_size()
+  local fsize = glfw.GetWindowFrameSize(window)
+  local fsize = window:GetFrameSize()
   print(fsize.left, fsize.top, fsize.right, fsize.bottom)
 
-  local axes = glfw.get_joystick_axes(joy)
+  local axes = glfw.GetJoystickAxes(joy)
   for i = 1, #axes do ... end
 
 ```

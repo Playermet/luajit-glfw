@@ -1,29 +1,29 @@
 local glfw = require 'glfw' ('glfw3')
 
 -- Initialize the library
-if glfw.init() == 0 then
+if glfw.Init() == 0 then
 	return
 end
 
 -- Create a windowed mode window and its OpenGL context
-local window = glfw.create_window(640, 480, "Hello World")
+local window = glfw.CreateWindow(640, 480, "Hello World")
 if window == 0 then
-	glfw.terminate()
+	glfw.Terminate()
 	return
 end
 
 -- Make the window's context current
-window:make_context_current()
+window:MakeContextCurrent()
 
 -- Loop until the user closes the window
-while window:should_close() == 0 do
+while window:ShouldClose() == 0 do
 	-- Render here
 
 	-- Swap front and back buffers
-	window:swap_buffers()
+	window:SwapBuffers()
 
 	-- Poll for and process events
-	glfw.poll_events()
+	glfw.PollEvents()
 end
 
-glfw.terminate()
+glfw.Terminate()
