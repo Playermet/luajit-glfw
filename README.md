@@ -48,7 +48,7 @@ glfw.Terminate()
 
 # Differences from the C API
 Binding is so close to the original API as possible, but some things still differ.
- 1. Names converted to snake_case and lost 'glfw' prefix as not needed.
+ 1. Names lost 'glfw' prefix.
  2. Arrays of chars replaced by lua string (except joystick buttons).
  3. Arrays of structs and strings replaced by lua tables.
  4. Values returned by reference replaced by returning table or multiple results.
