@@ -97,7 +97,7 @@ glfw.Terminate()
   for i = 1, #monitors do ... end
 
   local x,y = glfw.GetMonitorPos(monitor)
-  local x,y = monitor:get_pos()
+  local x,y = monitor:GetPos()
 
   local w,h = glfw.GetMonitorPhysicalSize(monitor)
   local w,h = monitor:GetPhysicalSize()
