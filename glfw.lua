@@ -1,5 +1,5 @@
 -----------------------------------------------------------
---  Binding for GLFW v3.1.1
+--  Binding for GLFW v3.1.2
 -----------------------------------------------------------
 local ffi = require 'ffi'
 local jit = require 'jit'
@@ -9,7 +9,7 @@ local const = {}
 
 const.VERSION_MAJOR    = 3
 const.VERSION_MINOR    = 1
-const.VERSION_REVISION = 0
+const.VERSION_REVISION = 2
 
 const.RELEASE = 0
 const.PRESS   = 1
