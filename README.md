@@ -25,6 +25,7 @@ Binding is so close to the original API as possible, but some things still diffe
 # Start using
 Before calling glfw functions you need to initialize binding with library name or path.
 Luajit uses dynamic library loading API directly, so behaviour may be different on each OS.
+Filename and location of glfw library may also vary.
 Several examples:
 ```lua
 -- Windows;
