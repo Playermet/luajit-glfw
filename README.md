@@ -22,7 +22,22 @@ Binding is so close to the original API as possible, but some things still diffe
  5. Video mode returned as table. This may change in future if necessary.
  6. Some OO methods have shortened names.
 
-# Example code
+# Start using
+Before calling glfw functions you need to initialize binding with library name or path.
+Luajit uses dynamic library loading API directly, so behaviour may be different on each OS.
+Several examples:
+```lua
+-- Windows;
+local glfw = require 'glfw' ('glfw3')
+local glfw = require 'glfw' ('../some/path/glfw3.dll')
+-- Linux;
+local glfw = require 'glfw' ('./libglfw3.so')
+local glfw = require 'glfw' ('/usr/local/lib/libglfw3.so')
+-- Mac OS X
+local glfw = require 'glfw' ('/opt/local/lib/libglfw.3.1.dylib')
+```
+
+# Quick example
 ```lua
 local glfw = require 'glfw' ('glfw3')
 
@@ -55,7 +70,7 @@ end
 glfw.Terminate()
 ```
 
-# Example code with OO style
+# Quick example with OO style
 ```lua
 local glfw = require 'glfw' ('glfw3')
 
