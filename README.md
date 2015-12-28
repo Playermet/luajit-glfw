@@ -28,10 +28,10 @@ Luajit uses dynamic library loading API directly, so behaviour may be different 
 Filename and location of glfw library may also vary.
 Several examples:
 ```lua
--- Windows;
+-- Windows
 local glfw = require 'glfw' ('glfw3')
 local glfw = require 'glfw' ('../some/path/glfw3.dll')
--- Linux;
+-- Linux
 local glfw = require 'glfw' ('./libglfw3.so')
 local glfw = require 'glfw' ('/usr/local/lib/libglfw3.so')
 -- Mac OS X
