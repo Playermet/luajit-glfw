@@ -37,6 +37,10 @@ local glfw = require 'glfw' ('/usr/local/lib/libglfw3.so')
 -- Mac OS X
 local glfw = require 'glfw' ('/opt/local/lib/libglfw.3.1.dylib')
 ```
+Constants stored in const table. It is recommended to save it in variable with GLFW name.
+```lua
+local GLFW = glfw.const
+```
 
 # Quick example
 ```lua
