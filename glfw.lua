@@ -969,7 +969,15 @@ mod.cb = cb
 local function init(self, name)
   ffi.cdef(header)
 
-  bind = ffi.load(name)
+  if name then
+    bind = ffi.load(name)
+  else
+    -- If no library argument is provided, we just
+    -- assume that the appropriate GLFW libraries
+    -- are already statically linked to the calling
+    -- program
+    bind = ffi.C
+  end
 
   ffi.metatype('GLFWmonitor', monitor_mt)
   ffi.metatype('GLFWwindow', window_mt)
