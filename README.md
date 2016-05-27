@@ -37,8 +37,9 @@ local glfw = require 'glfw' ('/usr/local/lib/libglfw3.so')
 -- Mac OS X
 local glfw = require 'glfw' ('/opt/local/lib/libglfw.3.1.dylib')
 ```
-For statically linked glwf, just skip argument.
+For statically linked glfw, just skip argument.
 ```lua
+-- Any OS
 local glfw = require 'glfw' ()
 ```
 Constants stored in const table. It is recommended to save it in variable with GLFW name.
