@@ -39,7 +39,7 @@ local glfw = require 'glfw' ('/opt/local/lib/libglfw.3.1.dylib')
 ```
 For statically linked glwf, just skip argument.
 ```lua
-local glfw = require 'glfw'
+local glfw = require 'glfw' ()
 ```
 Constants stored in const table. It is recommended to save it in variable with GLFW name.
 ```lua
