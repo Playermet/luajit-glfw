@@ -1,5 +1,5 @@
 # Features
- - Full support of 3.1.2 API (except native functions)
+ - Full support of 3.2.0 API (except native and vulkan functions)
  - Additional OO style for monitors, windows, and cursors
 ```lua
  glfw.ShowWindow(window)
