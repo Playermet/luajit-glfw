@@ -1,15 +1,51 @@
 -----------------------------------------------------------
---  Binding for GLFW v3.1.2
+--  Binding for GLFW v3.2.0
 -----------------------------------------------------------
 local ffi = require 'ffi'
 local jit = require 'jit'
 
 
+local aux = {}
+
 local const = {}
+local mod   = {}
+local cb    = {}
+
+local bind
+
+
+function aux.get_const(value)
+  local vtype = type(value)
+
+  if vtype == 'number' then
+    return value
+  end
+
+  if vtype == 'string' then
+    if const[value] then
+      return const[value]
+    else
+      error('unknown const name', 3)
+    end
+  end
+
+  error('bad const type', 3)
+end
+
+function aux.wrap_cb(cbfun, cbname)
+  if type(cbfun) == 'function' then
+    return cb[cbname](cbfun)
+  end
+  return cbfun
+end
+
 
 const.VERSION_MAJOR    = 3
-const.VERSION_MINOR    = 1
-const.VERSION_REVISION = 2
+const.VERSION_MINOR    = 2
+const.VERSION_REVISION = 0
+
+const.TRUE  = 1
+const.FALSE = 0
 
 const.RELEASE = 0
 const.PRESS   = 1
@@ -138,6 +174,7 @@ const.KEY_RIGHT_CONTROL = 345
 const.KEY_RIGHT_ALT     = 346
 const.KEY_RIGHT_SUPER   = 347
 const.KEY_MENU          = 348
+
 const.KEY_LAST          = const.KEY_MENU
 
 const.MOD_SHIFT   = 0x0001
@@ -185,6 +222,7 @@ const.API_UNAVAILABLE     = 0x00010006
 const.VERSION_UNAVAILABLE = 0x00010007
 const.PLATFORM_ERROR      = 0x00010008
 const.FORMAT_UNAVAILABLE  = 0x00010009
+const.NO_WINDOW_CONTEXT   = 0x0001000a
 
 const.FOCUSED      = 0x00020001
 const.ICONIFIED    = 0x00020002
@@ -193,6 +231,7 @@ const.VISIBLE      = 0x00020004
 const.DECORATED    = 0x00020005
 const.AUTO_ICONIFY = 0x00020006
 const.FLOATING     = 0x00020007
+const.MAXIMIZED    = 0x00020008
 
 const.RED_BITS         = 0x00021001
 const.GREEN_BITS       = 0x00021002
@@ -220,7 +259,10 @@ const.OPENGL_FORWARD_COMPAT    = 0x00022006
 const.OPENGL_DEBUG_CONTEXT     = 0x00022007
 const.OPENGL_PROFILE           = 0x00022008
 const.CONTEXT_RELEASE_BEHAVIOR = 0x00022009
+const.CONTEXT_NO_ERROR         = 0x0002200a
+const.CONTEXT_CREATION_API     = 0x0002200b
 
+const.NO_API        = 0
 const.OPENGL_API    = 0x00030001
 const.OPENGL_ES_API = 0x00030002
 
@@ -244,6 +286,9 @@ const.ANY_RELEASE_BEHAVIOR   = 0
 const.RELEASE_BEHAVIOR_FLUSH = 0x00035001
 const.RELEASE_BEHAVIOR_NONE  = 0x00035002
 
+const.NATIVE_CONTEXT_API = 0x00036001
+const.EGL_CONTEXT_API    = 0x00036002
+
 const.ARROW_CURSOR     = 0x00036001
 const.IBEAM_CURSOR     = 0x00036002
 const.CROSSHAIR_CURSOR = 0x00036003
@@ -257,27 +302,9 @@ const.DISCONNECTED = 0x00040002
 const.DONT_CARE = -1
 
 
-local function get_const(value)
-  local vtype = type(value)
-
-  if vtype == 'number' then
-    return value
-  end
-
-  if vtype == 'string' then
-    if const[value] then
-      return const[value]
-    else
-      error('unknown const name', 3)
-    end
-  end
-
-  error('bad const type', 3)
-end
-
-
 local header = [[
   typedef void (*GLFWglproc)(void);
+  typedef void (*GLFWvkproc)(void);
 
   typedef struct GLFWmonitor GLFWmonitor;
   typedef struct GLFWwindow GLFWwindow;
@@ -300,6 +327,7 @@ local header = [[
   typedef void (* GLFWcharmodsfun)(GLFWwindow*,unsigned int,int);
   typedef void (* GLFWdropfun)(GLFWwindow*,int,const char**);
   typedef void (* GLFWmonitorfun)(GLFWmonitor*,int);
+  typedef void (* GLFWjoystickfun)(int,int);
 
   typedef struct GLFWvidmode
   {
@@ -343,23 +371,29 @@ local header = [[
   const GLFWgammaramp* glfwGetGammaRamp(GLFWmonitor* monitor);
   void glfwSetGammaRamp(GLFWmonitor* monitor, const GLFWgammaramp* ramp);
   void glfwDefaultWindowHints(void);
-  void glfwWindowHint(int target, int hint);
+  void glfwWindowHint(int hint, int value);
   GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
   void glfwDestroyWindow(GLFWwindow* window);
   int glfwWindowShouldClose(GLFWwindow* window);
   void glfwSetWindowShouldClose(GLFWwindow* window, int value);
   void glfwSetWindowTitle(GLFWwindow* window, const char* title);
+  void glfwSetWindowIcon(GLFWwindow* window, int count, const GLFWimage* images);
   void glfwGetWindowPos(GLFWwindow* window, int* xpos, int* ypos);
   void glfwSetWindowPos(GLFWwindow* window, int xpos, int ypos);
   void glfwGetWindowSize(GLFWwindow* window, int* width, int* height);
+  void glfwSetWindowSizeLimits(GLFWwindow* window, int minwidth, int minheight, int maxwidth, int maxheight);
+  void glfwSetWindowAspectRatio(GLFWwindow* window, int numer, int denom);
   void glfwSetWindowSize(GLFWwindow* window, int width, int height);
   void glfwGetFramebufferSize(GLFWwindow* window, int* width, int* height);
   void glfwGetWindowFrameSize(GLFWwindow* window, int* left, int* top, int* right, int* bottom);
   void glfwIconifyWindow(GLFWwindow* window);
   void glfwRestoreWindow(GLFWwindow* window);
+  void glfwMaximizeWindow(GLFWwindow* window);
   void glfwShowWindow(GLFWwindow* window);
   void glfwHideWindow(GLFWwindow* window);
+  void glfwFocusWindow(GLFWwindow* window);
   GLFWmonitor* glfwGetWindowMonitor(GLFWwindow* window);
+  void glfwSetWindowMonitor(GLFWwindow* window, GLFWmonitor* monitor, int xpos, int ypos, int width, int height, int refreshRate);
   int glfwGetWindowAttrib(GLFWwindow* window, int attrib);
   void glfwSetWindowUserPointer(GLFWwindow* window, void* pointer);
   void* glfwGetWindowUserPointer(GLFWwindow* window);
@@ -372,9 +406,11 @@ local header = [[
   GLFWframebuffersizefun glfwSetFramebufferSizeCallback(GLFWwindow* window, GLFWframebuffersizefun cbfun);
   void glfwPollEvents(void);
   void glfwWaitEvents(void);
+  void glfwWaitEventsTimeout(double timeout);
   void glfwPostEmptyEvent(void);
   int glfwGetInputMode(GLFWwindow* window, int mode);
   void glfwSetInputMode(GLFWwindow* window, int mode, int value);
+  const char* glfwGetKeyName(int key, int scancode);
   int glfwGetKey(GLFWwindow* window, int key);
   int glfwGetMouseButton(GLFWwindow* window, int button);
   void glfwGetCursorPos(GLFWwindow* window, double* xpos, double* ypos);
@@ -395,23 +431,29 @@ local header = [[
   const float* glfwGetJoystickAxes(int joy, int* count);
   const unsigned char* glfwGetJoystickButtons(int joy, int* count);
   const char* glfwGetJoystickName(int joy);
+  GLFWjoystickfun glfwSetJoystickCallback(GLFWjoystickfun cbfun);
   void glfwSetClipboardString(GLFWwindow* window, const char* string);
   const char* glfwGetClipboardString(GLFWwindow* window);
   double glfwGetTime(void);
   void glfwSetTime(double time);
+  uint64_t glfwGetTimerValue(void);
+  uint64_t glfwGetTimerFrequency(void);
   void glfwMakeContextCurrent(GLFWwindow* window);
   GLFWwindow* glfwGetCurrentContext(void);
   void glfwSwapBuffers(GLFWwindow* window);
   void glfwSwapInterval(int interval);
   int glfwExtensionSupported(const char* extension);
   GLFWglproc glfwGetProcAddress(const char* procname);
+
+  /* TODO: Vulkan typedefs issue
+  int glfwVulkanSupported(void);
+  const char** glfwGetRequiredInstanceExtensions(uint32_t* count);
+  GLFWvkproc glfwGetInstanceProcAddress(VkInstance instance, const char* procname);
+  int glfwGetPhysicalDevicePresentationSupport(VkInstance instance, VkPhysicalDevice device, uint32_t queuefamily);
+  VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window, const VkAllocationCallbacks* allocator, VkSurfaceKHR* surface);
+  */
 ]]
 
-
-local bind = {}
-local aux  = {}
-local mod  = {}
-local cb   = {}
 
 function mod.Init()
   return bind.glfwInit()
@@ -424,14 +466,14 @@ end
 function mod.GetVersion()
   local major = ffi.new('int[1]')
   local minor = ffi.new('int[1]')
-  local rev = ffi.new('int[1]')
+  local rev   = ffi.new('int[1]')
 
   bind.glfwGetVersion(major, minor, rev)
 
   local version = {
     major = major[0],
     minor = minor[0],
-    rev = rev[0]
+    rev   = rev[0]
   }
 
   return version
@@ -446,13 +488,13 @@ function mod.SetErrorCallback(cbfun)
   return bind.glfwSetErrorCallback(cbfun)
 end
 
-function mod.GetMonitors()
+function mod.GetMonitors(monitors)
   local count = ffi.new('int[1]')
   local cmonitors = bind.glfwGetMonitors(count)
 
-  local monitors = {}
-  for i = 0, count[0] - 1 do
-    table.insert(monitors, cmonitors[i])
+  monitors = monitors or {}
+  for i = 1, count do
+    monitors[i] = cmonitors[i - 1]
   end
 
   return monitors
@@ -489,20 +531,20 @@ function mod.SetMonitorCallback(cbfun)
   return bind.glfwSetMonitorCallback(cbfun)
 end
 
-function mod.GetVideoModes(monitor)
+function mod.GetVideoModes(monitor, modes)
   local count = ffi.new('int[1]')
   local cmodes = bind.glfwGetVideoModes(monitor, count)
 
-  local modes = {}
-  for i = 0, count[0] - 1 do
-    table.insert(modes, {
+  modes = modes or {}
+  for i = 0, count - 1 do
+    modes[i + 1] = {
       width       = cmodes[i].width;
       height      = cmodes[i].height;
       redBits     = cmodes[i].redBits;
       greenBits   = cmodes[i].greenBits;
       blueBits    = cmodes[i].blueBits;
       refreshRate = cmodes[i].refreshRate;
-    })
+    }
   end
 
   return modes
@@ -539,8 +581,8 @@ function mod.DefaultWindowHints()
   bind.glfwDefaultWindowHints()
 end
 
-function mod.WindowHint(target, hint)
-  bind.glfwWindowHint(get_const(target), get_const(hint))
+function mod.WindowHint(hint, value)
+  bind.glfwWindowHint(aux.get_const(hint), aux.get_const(value))
 end
 
 function mod.CreateWindow(width, height, title, monitor, share)
@@ -561,6 +603,16 @@ end
 
 function mod.SetWindowTitle(window, title)
   bind.glfwSetWindowTitle(window, title)
+end
+
+function mod.SetWindowIcon(window, images)
+  local cimages = ffi.new('GLFWimage[?]', #images)
+
+  for i = 1, #images do
+    cimages[i - 1] = images[i]
+  end
+
+  bind.glfwSetWindowIcon(window, #images, cimages)
 end
 
 function mod.GetWindowPos(window)
@@ -585,6 +637,14 @@ function mod.GetWindowSize(window)
   return width[0], height[0]
 end
 
+function mod.SetWindowSizeLimits(window, minwidth, minheight, maxwidth, maxheight)
+  bind.glfwSetWindowSizeLimits(window, minwidth, minheight, maxwidth, maxheight)
+end
+
+function mod.SetWindowAspectRatio(window, numer, denom)
+  bind.glfwSetWindowAspectRatio(window, numer, denom)
+end
+
 function mod.SetWindowSize(window, width, height)
   bind.glfwSetWindowSize(window, width, height)
 end
@@ -598,20 +658,19 @@ function mod.GetFramebufferSize(window)
   return width[0], height[0]
 end
 
-function mod.GetWindowFrameSize(window)
-  local left = ffi.new('int[1]')
-  local top = ffi.new('int[1]')
-  local right = ffi.new('int[1]')
+function mod.GetWindowFrameSize(window, out)
+  local left   = ffi.new('int[1]')
+  local top    = ffi.new('int[1]')
+  local right  = ffi.new('int[1]')
   local bottom = ffi.new('int[1]')
 
   bind.glfwGetWindowFrameSize(window, left, top, right, bottom)
 
-  local out = {
-    left   = left[0],
-    top    = top[0],
-    right  = right[0],
-    bottom = bottom[0]
-  }
+  out = out or {}
+  out.left   = left[0]
+  out.top    = top[0]
+  out.right  = right[0]
+  out.bottom = bottom[0]
 
   return out
 end
@@ -624,6 +683,10 @@ function mod.RestoreWindow(window)
   bind.glfwRestoreWindow(window)
 end
 
+function mod.MaximizeWindow(window)
+  bind.glfwMaximizeWindow(window)
+end
+
 function mod.ShowWindow(window)
   bind.glfwShowWindow(window)
 end
@@ -632,12 +695,20 @@ function mod.HideWindow(window)
   bind.glfwHideWindow(window)
 end
 
+function mod.FocusWindow(window)
+  bind.glfwFocusWindow(window)
+end
+
 function mod.GetWindowMonitor(window)
   return bind.glfwGetWindowMonitor(window)
 end
 
+function mod.SetWindowMonitor(window, monitor, xpos, ypos, width, height, refreshRate)
+  bind.glfwSetWindowMonitor(window, monitor, xpos, ypos, width, height, refreshRate)
+end
+
 function mod.GetWindowAttrib(window, attrib)
-  return bind.glfwGetWindowAttrib(window, get_const(attrib))
+  return bind.glfwGetWindowAttrib(window, aux.get_const(attrib))
 end
 
 function mod.SetWindowUserPointer(window, pointer)
@@ -691,24 +762,32 @@ function mod.WaitEvents()
   bind.glfwWaitEvents()
 end
 
+function mod.WaitEventsTimeout(timeout)
+  bind.glfwWaitEventsTimeout(timeout)
+end
+
 function mod.PostEmptyEvent()
   bind.glfwPostEmptyEvent()
 end
 
 function mod.GetInputMode(window, mode)
-  return bind.glfwGetInputMode(window, get_const(mode))
+  return bind.glfwGetInputMode(window, aux.get_const(mode))
 end
 
 function mod.SetInputMode(window, mode, value)
-  bind.glfwSetInputMode(window, get_const(mode), value)
+  bind.glfwSetInputMode(window, aux.get_const(mode), value)
+end
+
+function mod.GetKeyName(key, scancode)
+  return ffi.string(bind.glfwGetKeyName(key, scancode))
 end
 
 function mod.GetKey(window, key)
-  return bind.glfwGetKey(window, get_const(key))
+  return bind.glfwGetKey(window, aux.get_const(key))
 end
 
 function mod.GetMouseButton(window, button)
-  return bind.glfwGetMouseButton(window, get_const(button))
+  return bind.glfwGetMouseButton(window, aux.get_const(button))
 end
 
 function mod.GetCursorPos(window)
@@ -729,7 +808,7 @@ function mod.CreateCursor(image, xhot, yhot)
 end
 
 function mod.CreateStandardCursor(shape)
-  return bind.glfwCreateStandardCursor(get_const(shape))
+  return bind.glfwCreateStandardCursor(aux.get_const(shape))
 end
 
 function mod.DestroyCursor(cursor)
@@ -781,35 +860,40 @@ function mod.SetDropCallback(window, cbfun)
 end
 
 function mod.JoystickPresent(joy)
-  return bind.glfwJoystickPresent(get_const(joy))
+  return bind.glfwJoystickPresent(aux.get_const(joy))
 end
 
-function mod.GetJoystickAxes(joy)
+function mod.GetJoystickAxes(joy, axes)
   local count = ffi.new('int[1]')
-  local caxes = bind.glfwGetJoystickAxes(get_const(joy), count)
+  local caxes = bind.glfwGetJoystickAxes(aux.get_const(joy), count)
 
-  local axes = {}
-  for i = 0, count[0] - 1 do
-    table.insert(axes, caxes[i])
+  axes = axes or {}
+  for i = 1, count do
+    axes[i] = caxes[i - 1]
   end
 
   return axes
 end
 
-function mod.GetJoystickButtons(joy)
+function mod.GetJoystickButtons(joy, buttons)
   local count = ffi.new('int[1]')
-  local cbuttons = bind.glfwGetJoystickButtons(get_const(joy), count)
+  local cbuttons = bind.glfwGetJoystickButtons(aux.get_const(joy), count)
 
-  local buttons = {}
-  for i = 0, count[0] - 1 do
-    table.insert(buttons, cbuttons[i])
+  buttons = buttons or {}
+  for i = 1, count do
+    buttons[i] = cbuttons[i - 1]
   end
 
   return buttons
 end
 
 function mod.GetJoystickName(joy)
-  return ffi.string(bind.glfwGetJoystickName(get_const(joy)))
+  return ffi.string(bind.glfwGetJoystickName(aux.get_const(joy)))
+end
+
+function mod.SetJoystickCallback(cbfun)
+  cbfun = aux.wrap_cb(cbfun, 'joystickfun')
+  return bind.glfwSetJoystickCallback(cbfun)
 end
 
 function mod.SetClipboardString(window, string)
@@ -826,6 +910,14 @@ end
 
 function mod.SetTime(time)
   bind.glfwSetTime(time)
+end
+
+function mod.GetTimerValue()
+  return bind.glfwGetTimerValue()
+end
+
+function mod.GetTimerFrequency()
+  return bind.glfwGetTimerFrequency()
 end
 
 function mod.MakeContextCurrent(window)
@@ -853,11 +945,23 @@ function mod.GetProcAddress(procname)
 end
 
 
-function aux.wrap_cb(cbfun, cbname)
-  if type(cbfun) == 'function' then
-    return cb[cbname](cbfun)
+function mod.WindowHints(hints)
+  for hint,value in pairs(hints) do
+    mod.WindowHint(hint, value)
   end
-  return cb
+end
+
+function mod.CreateImage(width, height)
+  local image = ffi.new('GLFWimage')
+
+  -- Allocate pixels if size specified
+  if type(width) == 'number' and type(height) == 'number' then
+    image.width  = width
+    image.height = height
+    image.pixels = ffi.new('unsigned char[?]', width * height * 4)
+  end
+
+  return image
 end
 
 
@@ -878,6 +982,7 @@ cb.charfun            = 'GLFWcharfun'
 cb.charmodsfun        = 'GLFWcharmodsfun'
 cb.dropfun_raw        = 'GLFWdropfun'
 cb.monitorfun         = 'GLFWmonitorfun'
+cb.joystickfun        = 'GLFWjoystickfun'
 
 function cb.errorfun(func)
   return cb.errorfun_raw(function(error, description)
@@ -913,17 +1018,23 @@ window_mt.Destroy                    = mod.DestroyWindow
 window_mt.ShouldClose                = mod.WindowShouldClose
 window_mt.SetShouldClose             = mod.SetWindowShouldClose
 window_mt.SetTitle                   = mod.SetWindowTitle
+window_mt.SetIcon                    = mod.SetWindowIcon
 window_mt.GetPos                     = mod.GetWindowPos
 window_mt.SetPos                     = mod.SetWindowPos
 window_mt.GetSize                    = mod.GetWindowSize
+window_mt.SetSizeLimits              = mod.SetWindowSizeLimits
+window_mt.SetAspectRatio             = mod.SetWindowAspectRatio
 window_mt.SetSize                    = mod.SetWindowSize
 window_mt.GetFramebufferSize         = mod.GetFramebufferSize
 window_mt.GetFrameSize               = mod.GetWindowFrameSize
 window_mt.Iconify                    = mod.IconifyWindow
 window_mt.Restore                    = mod.RestoreWindow
+window_mt.Maximize                   = mod.MaximizeWindow
 window_mt.Show                       = mod.ShowWindow
 window_mt.Hide                       = mod.HideWindow
+window_mt.Focus                      = mod.FocusWindow
 window_mt.GetMonitor                 = mod.GetWindowMonitor
+window_mt.SetMonitor                 = mod.SetWindowMonitor
 window_mt.GetAttrib                  = mod.GetWindowAttrib
 window_mt.SetUserPointer             = mod.SetWindowUserPointer
 window_mt.GetUserPointer             = mod.GetWindowUserPointer
@@ -959,8 +1070,12 @@ cursor_mt.__index = cursor_mt
 cursor_mt.Destroy = mod.DestroyCursor
 
 
+-- Luajit does not allow to call Lua-callbacks
+-- from JIT-compiled C-functions, so we
+-- manually turn JIT for them
 jit.off(mod.PollEvents)
 jit.off(mod.WaitEvents)
+jit.off(mod.WaitEventsTimeout)
 
 
 mod.const = const
