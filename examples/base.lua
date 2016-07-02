@@ -1,4 +1,4 @@
-local glfw = require 'glfw' ('glfw3')
+local glfw = require '../glfw' ('glfw3')
 
 -- Initialize the library
 if glfw.Init() == 0 then
