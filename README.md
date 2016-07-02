@@ -1,5 +1,5 @@
 # Features
- - Full support of 3.2.0 API (except native and vulkan functions)
+ - Full support of 3.2.0 API (except native functions)
  - Additional OO style for monitors, windows, and cursors
 ```lua
  glfw.ShowWindow(window)
@@ -45,6 +45,13 @@ local glfw = require 'glfw' ()
 Constants stored in const table. It is recommended to save it in variable with GLFW name.
 ```lua
 local GLFW = glfw.const
+```
+If you need vulkan-related functions, then specify 'bind_vulkan' option.
+Vulkan types MUST be declared (manually or with other binding) before this.
+```lua
+local glfw = require 'glfw' { 'glfw3',
+  bind_vulkan = true
+}
 ```
 
 # Quick example
