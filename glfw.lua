@@ -1071,7 +1071,7 @@ function bind_clib()
   -----------------------------------------------------------
   --  Types
   -----------------------------------------------------------
-  monitor_mt                 = aux.class()
+  local monitor_mt           = aux.class()
   monitor_mt.GetPos          = funcs.GetMonitorPos
   monitor_mt.GetPhysicalSize = funcs.GetMonitorPhysicalSize
   monitor_mt.GetName         = funcs.GetMonitorName
@@ -1081,7 +1081,7 @@ function bind_clib()
   monitor_mt.GetGammaRamp    = funcs.GetGammaRamp
   monitor_mt.SetGammaRamp    = funcs.SetGammaRamp
 
-  window_mt                            = aux.class()
+  local window_mt                      = aux.class()
   window_mt.Destroy                    = funcs.DestroyWindow
   window_mt.ShouldClose                = funcs.WindowShouldClose
   window_mt.SetShouldClose             = funcs.SetWindowShouldClose
@@ -1133,7 +1133,7 @@ function bind_clib()
   window_mt.MakeContextCurrent         = funcs.MakeContextCurrent
   window_mt.SwapBuffers                = funcs.SwapBuffers
 
-  cursor_mt         = aux.class()
+  local cursor_mt   = aux.class()
   cursor_mt.Destroy = funcs.DestroyCursor
 
   ffi.metatype('GLFWmonitor', monitor_mt)
