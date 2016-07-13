@@ -29,7 +29,6 @@
 ]]
 
 local ffi = require 'ffi'
-local jit = require 'jit'
 
 local mod = {} -- Lua module namespace
 local aux = {} -- Auxiliary utils
@@ -1039,12 +1038,17 @@ function bind_clib()
     end
   end
 
-  -- Luajit does not allow to call Lua-callbacks
-  -- from JIT-compiled C-functions, so we
-  -- manually turn off JIT for them
-  jit.off(funcs.PollEvents)
-  jit.off(funcs.WaitEvents)
-  jit.off(funcs.WaitEventsTimeout)
+  do
+    -- Luajit does not allow to call Lua-callbacks
+    -- from JIT-compiled C-functions, so we
+    -- manually turn off JIT for them
+    local is_luajit, jit = pcall(require, 'jit')
+    if is_luajit then
+      jit.off(funcs.PollEvents)
+      jit.off(funcs.WaitEvents)
+      jit.off(funcs.WaitEventsTimeout)
+    end
+  end
 
   -----------------------------------------------------------
   --  Extra functions
