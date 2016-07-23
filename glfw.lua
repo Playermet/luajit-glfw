@@ -890,12 +890,12 @@ function bind_clib()
 
   function funcs.SetCharCallback(window, cbfun)
     cbfun = aux.wrap_cb(cbs, cbfun, 'charfun')
-    return ffi.string(clib.glfwSetCharCallback(window, cbfun))
+    return clib.glfwSetCharCallback(window, cbfun)
   end
 
   function funcs.SetCharModsCallback(window, cbfun)
     cbfun = aux.wrap_cb(cbs, cbfun, 'charmodsfun')
-    return ffi.string(clib.glfwSetCharModsCallback(window, cbfun))
+    return clib.glfwSetCharModsCallback(window, cbfun)
   end
 
   function funcs.SetMouseButtonCallback(window, cbfun)
