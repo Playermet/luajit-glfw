@@ -587,7 +587,7 @@ function bind_clib()
   end
 
   function funcs.GetMonitorName(monitor)
-    return ffi.string(clib.glfwGetMonitorName(monitor))
+    return aux.string_or_nil(clib.glfwGetMonitorName(monitor))
   end
 
   function funcs.SetMonitorCallback(cbfun)
@@ -843,7 +843,7 @@ function bind_clib()
   end
 
   function funcs.GetKeyName(key, scancode)
-    return ffi.string(clib.glfwGetKeyName(key, scancode))
+    return aux.string_or_nil(clib.glfwGetKeyName(key, scancode))
   end
 
   function funcs.GetKey(window, key)
@@ -952,7 +952,7 @@ function bind_clib()
   end
 
   function funcs.GetJoystickName(joy)
-    return ffi.string(clib.glfwGetJoystickName(aux.get_const(const, joy)))
+    return aux.string_or_nil(clib.glfwGetJoystickName(aux.get_const(const, joy)))
   end
 
   function funcs.SetJoystickCallback(cbfun)
@@ -965,7 +965,7 @@ function bind_clib()
   end
 
   function funcs.GetClipboardString(window)
-    return ffi.string(clib.glfwGetClipboardString(window))
+    return aux.string_or_nil(clib.glfwGetClipboardString(window))
   end
 
   function funcs.GetTime()
@@ -1226,6 +1226,13 @@ function aux.set_mt_method(t,k,v)
   else
     setmetatable(t, { [k] = v })
   end
+end
+
+function aux.string_or_nil(cstr)
+  if cstr ~= nil then
+    return ffi.string(cstr)
+  end
+  return nil
 end
 
 
