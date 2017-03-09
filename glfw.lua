@@ -577,11 +577,11 @@ function bind_clib()
     return xpos[0], ypos[0]
   end
 
-  function funcs.GetMonitorPos(monitor)
+  function funcs.GetMonitorPhysicalSize(monitor)
     local width = ffi.new('int[1]')
     local height = ffi.new('int[1]')
 
-    clib.glfwGetMonitorPos(monitor, width, height)
+    clib.glfwGetMonitorPhysicalSize(monitor, width, height)
 
     return width[0], height[0]
   end
