@@ -36,6 +36,8 @@ local aux = {} -- Auxiliary utils
 local args -- Arguments for binding
 local clib -- C library namespace
 
+local is_luajit = pcall(require, 'jit')
+
 
 local load_clib, bind_clib -- Forward declaration
 
@@ -358,6 +360,10 @@ function bind_clib()
   const.DISCONNECTED = 0x00040002
 
   const.DONT_CARE = -1
+
+  if not is_luajit then
+    const.NULL = ffi.C.NULL
+  end
 
   -----------------------------------------------------------
   --  Headers
@@ -1072,6 +1078,7 @@ function bind_clib()
     return image
   end
 
+
   -----------------------------------------------------------
   --  Types
   -----------------------------------------------------------
@@ -1228,9 +1235,16 @@ function aux.set_mt_method(t,k,v)
   end
 end
 
-function aux.is_null(ptr)
-  -- Works both for luajit and luaffi
-  return ptr == ffi.NULL
+if is_luajit then
+  -- LuaJIT way to compare with NULL
+  function aux.is_null(ptr)
+    return ptr == nil
+  end
+else
+  -- LuaFFI way to compare with NULL
+  function aux.is_null(ptr)
+    return ptr == ffi.C.NULL
+  end
 end
 
 function aux.string_or_nil(cstr)
