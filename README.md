@@ -1,7 +1,7 @@
 # Features
  - Full support of 3.2.0 API (except native functions)
- - Additional OO style for monitors, windows, and cursors
  - Supports both Luajit and Lua with luaffi
+ - Additional OO style for monitors, windows, and cursors
 ```lua
  glfw.ShowWindow(window)
  -- or
