@@ -1228,8 +1228,13 @@ function aux.set_mt_method(t,k,v)
   end
 end
 
+function aux.is_null(ptr)
+  -- Works both for luajit and luaffi
+  return ptr == ffi.NULL
+end
+
 function aux.string_or_nil(cstr)
-  if cstr ~= nil then
+  if not aux.is_null(cstr) then
     return ffi.string(cstr)
   end
   return nil
