@@ -284,14 +284,18 @@ function bind_clib()
   const.FORMAT_UNAVAILABLE  = 0x00010009
   const.NO_WINDOW_CONTEXT   = 0x0001000a
 
-  const.FOCUSED      = 0x00020001
-  const.ICONIFIED    = 0x00020002
-  const.RESIZABLE    = 0x00020003
-  const.VISIBLE      = 0x00020004
-  const.DECORATED    = 0x00020005
-  const.AUTO_ICONIFY = 0x00020006
-  const.FLOATING     = 0x00020007
-  const.MAXIMIZED    = 0x00020008
+  const.FOCUSED                 = 0x00020001
+  const.ICONIFIED               = 0x00020002
+  const.RESIZABLE               = 0x00020003
+  const.VISIBLE                 = 0x00020004
+  const.DECORATED               = 0x00020005
+  const.AUTO_ICONIFY            = 0x00020006
+  const.FLOATING                = 0x00020007
+  const.MAXIMIZED               = 0x00020008
+  const.CENTER_CURSOR           = 0x00020009
+  const.TRANSPARENT_FRAMEBUFFER = 0x0002000A
+  const.HOVERED                 = 0x0002000B
+  const.FOCUS_ON_SHOW           = 0x0002000C
 
   const.RED_BITS         = 0x00021001
   const.GREEN_BITS       = 0x00021002
@@ -321,6 +325,12 @@ function bind_clib()
   const.CONTEXT_RELEASE_BEHAVIOR = 0x00022009
   const.CONTEXT_NO_ERROR         = 0x0002200a
   const.CONTEXT_CREATION_API     = 0x0002200b
+  const.SCALE_TO_MONITOR         = 0x0002200C
+  const.COCOA_RETINA_FRAMEBUFFER = 0x00023001
+  const.COCOA_FRAME_NAME         = 0x00023002
+  const.COCOA_GRAPHICS_SWITCHING = 0x00023003
+  const.X11_CLASS_NAME           = 0x00024001
+  const.X11_INSTANCE_NAME        = 0x00024002
 
   const.NO_API        = 0
   const.OPENGL_API    = 0x00030001
@@ -337,6 +347,8 @@ function bind_clib()
   const.CURSOR               = 0x00033001
   const.STICKY_KEYS          = 0x00033002
   const.STICKY_MOUSE_BUTTONS = 0x00033003
+  const.LOCK_KEY_MODS        = 0x00033004
+  const.RAW_MOUSE_MOTION     = 0x00033005
 
   const.CURSOR_NORMAL   = 0x00034001
   const.CURSOR_HIDDEN   = 0x00034002
@@ -348,6 +360,7 @@ function bind_clib()
 
   const.NATIVE_CONTEXT_API = 0x00036001
   const.EGL_CONTEXT_API    = 0x00036002
+  const.OSMESA_CONTEXT_API = 0x00036003
 
   const.ARROW_CURSOR     = 0x00036001
   const.IBEAM_CURSOR     = 0x00036002
@@ -424,6 +437,7 @@ function bind_clib()
 
     int glfwInit(void);
     void glfwTerminate(void);
+    void glfwInitHint(int hint, int value);
     void glfwGetVersion(int* major, int* minor, int* rev);
     const char* glfwGetVersionString(void);
     int glfwGetError(const char** description);
@@ -431,9 +445,12 @@ function bind_clib()
     GLFWmonitor** glfwGetMonitors(int* count);
     GLFWmonitor* glfwGetPrimaryMonitor(void);
     void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
+    void glfwGetMonitorWorkarea(GLFWmonitor* monitor, int* xpos, int* ypos, int* width, int* height);
     void glfwGetMonitorPhysicalSize(GLFWmonitor* monitor, int* widthMM, int* heightMM);
     void glfwGetMonitorContentScale(GLFWmonitor* monitor, float* xscale, float* yscale);
     const char* glfwGetMonitorName(GLFWmonitor* monitor);
+    void glfwSetMonitorUserPointer(GLFWmonitor* monitor, void* pointer);
+    void* glfwGetMonitorUserPointer(GLFWmonitor* monitor);
     GLFWmonitorfun glfwSetMonitorCallback(GLFWmonitorfun cbfun);
     const GLFWvidmode* glfwGetVideoModes(GLFWmonitor* monitor, int* count);
     const GLFWvidmode* glfwGetVideoMode(GLFWmonitor* monitor);
@@ -442,6 +459,7 @@ function bind_clib()
     void glfwSetGammaRamp(GLFWmonitor* monitor, const GLFWgammaramp* ramp);
     void glfwDefaultWindowHints(void);
     void glfwWindowHint(int hint, int value);
+    void glfwWindowHintString(int hint, const char* value);
     GLFWwindow* glfwCreateWindow(int width, int height, const char* title, GLFWmonitor* monitor, GLFWwindow* share);
     void glfwDestroyWindow(GLFWwindow* window);
     int glfwWindowShouldClose(GLFWwindow* window);
@@ -457,15 +475,19 @@ function bind_clib()
     void glfwGetFramebufferSize(GLFWwindow* window, int* width, int* height);
     void glfwGetWindowFrameSize(GLFWwindow* window, int* left, int* top, int* right, int* bottom);
     void glfwGetWindowContentScale(GLFWwindow* window, float* xscale, float* yscale);
+    float glfwGetWindowOpacity(GLFWwindow* window);
+    void glfwSetWindowOpacity(GLFWwindow* window, float opacity);
     void glfwIconifyWindow(GLFWwindow* window);
     void glfwRestoreWindow(GLFWwindow* window);
     void glfwMaximizeWindow(GLFWwindow* window);
     void glfwShowWindow(GLFWwindow* window);
     void glfwHideWindow(GLFWwindow* window);
     void glfwFocusWindow(GLFWwindow* window);
+    void glfwRequestWindowAttention(GLFWwindow* window);
     GLFWmonitor* glfwGetWindowMonitor(GLFWwindow* window);
     void glfwSetWindowMonitor(GLFWwindow* window, GLFWmonitor* monitor, int xpos, int ypos, int width, int height, int refreshRate);
     int glfwGetWindowAttrib(GLFWwindow* window, int attrib);
+    void glfwSetWindowAttrib(GLFWwindow* window, int attrib, int value);
     void glfwSetWindowUserPointer(GLFWwindow* window, void* pointer);
     void* glfwGetWindowUserPointer(GLFWwindow* window);
     GLFWwindowposfun glfwSetWindowPosCallback(GLFWwindow* window, GLFWwindowposfun cbfun);
@@ -483,7 +505,9 @@ function bind_clib()
     void glfwPostEmptyEvent(void);
     int glfwGetInputMode(GLFWwindow* window, int mode);
     void glfwSetInputMode(GLFWwindow* window, int mode, int value);
+    int glfwRawMouseMotionSupported(void);
     const char* glfwGetKeyName(int key, int scancode);
+    int glfwGetKeyScancode(int key);
     int glfwGetKey(GLFWwindow* window, int key);
     int glfwGetMouseButton(GLFWwindow* window, int button);
     void glfwGetCursorPos(GLFWwindow* window, double* xpos, double* ypos);
@@ -538,6 +562,10 @@ function bind_clib()
 
   function funcs.Terminate()
     clib.glfwTerminate()
+  end
+
+  function funcs.InitHint(hint, value)
+    clib.glfwInitHint(aux.get_const(const, hint), aux.get_const(const, value))
   end
 
   function funcs.GetVersion()
@@ -596,6 +624,23 @@ function bind_clib()
     return xpos[0], ypos[0]
   end
 
+  function funcs.GetMonitorWorkarea(window, out)
+    local xpos   = ffi.new('int[1]')
+    local ypos   = ffi.new('int[1]')
+    local width  = ffi.new('int[1]')
+    local height = ffi.new('int[1]')
+
+    clib.glfwGetMonitorWorkarea(window, xpos, ypos, width, height)
+
+    out = out or {}
+    out.xpos   = xpos[0]
+    out.ypos   = ypos[0]
+    out.width  = width[0]
+    out.height = height[0]
+
+    return out
+  end
+
   function funcs.GetMonitorPhysicalSize(monitor)
     local width = ffi.new('int[1]')
     local height = ffi.new('int[1]')
@@ -616,6 +661,14 @@ function bind_clib()
 
   function funcs.GetMonitorName(monitor)
     return aux.string_or_nil(clib.glfwGetMonitorName(monitor))
+  end
+
+  function funcs.SetMonitorUserPointer(monitor, pointer)
+    clib.glfwSetMonitorUserPointer(monitor, pointer)
+  end
+
+  function funcs.GetMonitorUserPointer(monitor)
+    return clib.glfwGetMonitorUserPointer(monitor)
   end
 
   function funcs.SetMonitorCallback(cbfun)
@@ -675,6 +728,10 @@ function bind_clib()
 
   function funcs.WindowHint(hint, value)
     clib.glfwWindowHint(aux.get_const(const, hint), aux.get_const(const, value))
+  end
+
+  function funcs.WindowHintString(hint, value)
+    clib.glfwWindowHintString(aux.get_const(const, hint), value)
   end
 
   function funcs.CreateWindow(width, height, title, monitor, share)
@@ -776,6 +833,14 @@ function bind_clib()
     return xscale[0], yscale[0]
   end
 
+  function funcs.GetWindowOpacity(window)
+    return clib.glfwGetWindowOpacity(window)
+  end
+
+  function funcs.SetWindowOpacity(window, opacity)
+    clib.glfwSetWindowOpacity(window, opacity)
+  end
+
   function funcs.IconifyWindow(window)
     clib.glfwIconifyWindow(window)
   end
@@ -800,6 +865,10 @@ function bind_clib()
     clib.glfwFocusWindow(window)
   end
 
+  function funcs.RequestWindowAttention(window)
+    clib.glfwRequestWindowAttention(window)
+  end
+
   function funcs.GetWindowMonitor(window)
     return clib.glfwGetWindowMonitor(window)
   end
@@ -810,6 +879,10 @@ function bind_clib()
 
   function funcs.GetWindowAttrib(window, attrib)
     return clib.glfwGetWindowAttrib(window, aux.get_const(const, attrib))
+  end
+
+  function funcs.SetWindowAttrib(window, attrib, value)
+    clib.glfwSetWindowAttrib(window, aux.get_const(const, attrib), value)
   end
 
   function funcs.SetWindowUserPointer(window, pointer)
@@ -889,8 +962,16 @@ function bind_clib()
     clib.glfwSetInputMode(window, aux.get_const(const, mode), value)
   end
 
+  function funcs.RawMouseMotionSupported()
+    return clib.glfwRawMouseMotionSupported()
+  end
+
   function funcs.GetKeyName(key, scancode)
     return aux.string_or_nil(clib.glfwGetKeyName(key, scancode))
+  end
+
+  function funcs.GetKeyScancode(key)
+    return clib.glfwGetKeyScancode(key)
   end
 
   function funcs.GetKey(window, key)
@@ -1125,9 +1206,12 @@ function bind_clib()
   -----------------------------------------------------------
   local monitor_mt           = aux.class()
   monitor_mt.GetPos          = funcs.GetMonitorPos
+  monitor_mt.GetWorkarea     = funcs.GetMonitorWorkarea
   monitor_mt.GetPhysicalSize = funcs.GetMonitorPhysicalSize
   monitor_mt.GetContentScale = funcs.GetMonitorContentScale
   monitor_mt.GetName         = funcs.GetMonitorName
+  monitor_mt.SetUserPointer  = funcs.SetMonitorUserPointer
+  monitor_mt.GetUserPointer  = funcs.GetMonitorUserPointer
   monitor_mt.GetVideoModes   = funcs.GetVideoModes
   monitor_mt.GetVideoMode    = funcs.GetVideoMode
   monitor_mt.SetGamma        = funcs.SetGamma
@@ -1149,15 +1233,19 @@ function bind_clib()
   window_mt.GetFramebufferSize         = funcs.GetFramebufferSize
   window_mt.GetFrameSize               = funcs.GetWindowFrameSize
   window_mt.GetContentScale            = funcs.GetWindowContentScale
+  window_mt.GetOpacity                 = funcs.GetWindowOpacity
+  window_mt.SetOpacity                 = funcs.SetWindowOpacity
   window_mt.Iconify                    = funcs.IconifyWindow
   window_mt.Restore                    = funcs.RestoreWindow
   window_mt.Maximize                   = funcs.MaximizeWindow
   window_mt.Show                       = funcs.ShowWindow
   window_mt.Hide                       = funcs.HideWindow
   window_mt.Focus                      = funcs.FocusWindow
+  window_mt.RequestAttention           = funcs.RequestWindowAttention
   window_mt.GetMonitor                 = funcs.GetWindowMonitor
   window_mt.SetMonitor                 = funcs.SetWindowMonitor
   window_mt.GetAttrib                  = funcs.GetWindowAttrib
+  window_mt.SetAttrib                  = funcs.SetWindowAttrib
   window_mt.SetUserPointer             = funcs.SetWindowUserPointer
   window_mt.GetUserPointer             = funcs.GetWindowUserPointer
   window_mt.SetPosCallback             = funcs.SetWindowPosCallback
