@@ -383,7 +383,9 @@ function bind_clib()
     typedef void (* GLFWwindowrefreshfun)(GLFWwindow*);
     typedef void (* GLFWwindowfocusfun)(GLFWwindow*,int);
     typedef void (* GLFWwindowiconifyfun)(GLFWwindow*,int);
+    typedef void (* GLFWwindowmaximizefun)(GLFWwindow*,int);
     typedef void (* GLFWframebuffersizefun)(GLFWwindow*,int,int);
+    typedef void (* GLFWwindowcontentscalefun)(GLFWwindow*,float,float);
     typedef void (* GLFWmousebuttonfun)(GLFWwindow*,int,int,int);
     typedef void (* GLFWcursorposfun)(GLFWwindow*,double,double);
     typedef void (* GLFWcursorenterfun)(GLFWwindow*,int);
@@ -469,7 +471,9 @@ function bind_clib()
     GLFWwindowrefreshfun glfwSetWindowRefreshCallback(GLFWwindow* window, GLFWwindowrefreshfun cbfun);
     GLFWwindowfocusfun glfwSetWindowFocusCallback(GLFWwindow* window, GLFWwindowfocusfun cbfun);
     GLFWwindowiconifyfun glfwSetWindowIconifyCallback(GLFWwindow* window, GLFWwindowiconifyfun cbfun);
+    GLFWwindowmaximizefun glfwSetWindowMaximizeCallback(GLFWwindow* window, GLFWwindowmaximizefun cbfun);
     GLFWframebuffersizefun glfwSetFramebufferSizeCallback(GLFWwindow* window, GLFWframebuffersizefun cbfun);
+    GLFWwindowcontentscalefun glfwSetWindowContentScaleCallback(GLFWwindow* window, GLFWwindowcontentscalefun cbfun);
     void glfwPollEvents(void);
     void glfwWaitEvents(void);
     void glfwWaitEventsTimeout(double timeout);
@@ -819,9 +823,19 @@ function bind_clib()
     return clib.glfwSetWindowIconifyCallback(window, cbfun)
   end
 
+  function funcs.SetWindowMaximizeCallback(window, cbfun)
+    cbfun = aux.wrap_cb(cbs, cbfun, 'windowmaximizefun')
+    return clib.glfwSetWindowMaximizeCallback(window, cbfun)
+  end
+
   function funcs.SetFramebufferSizeCallback(window, cbfun)
     cbfun = aux.wrap_cb(cbs, cbfun, 'framebuffersizefun')
     return clib.glfwSetFramebufferSizeCallback(window, cbfun)
+  end
+
+  function funcs.SetWindowContentScaleCallback(window, cbfun)
+    cbfun = aux.wrap_cb(cbs, cbfun, 'windowcontentscalefun')
+    return clib.glfwSetWindowContentScaleCallback(window, cbfun)
   end
 
   function funcs.PollEvents()
@@ -1123,7 +1137,9 @@ function bind_clib()
   window_mt.SetRefreshCallback         = funcs.SetWindowRefreshCallback
   window_mt.SetFocusCallback           = funcs.SetWindowFocusCallback
   window_mt.SetIconifyCallback         = funcs.SetWindowIconifyCallback
+  window_mt.SetMaximizeCallback        = funcs.SetWindowMaximizeCallback
   window_mt.SetFramebufferSizeCallback = funcs.SetFramebufferSizeCallback
+  window_mt.SetContentScaleCallback    = funcs.SetWindowContentScaleCallback
   window_mt.GetInputMode               = funcs.GetInputMode
   window_mt.SetInputMode               = funcs.SetInputMode
   window_mt.GetKey                     = funcs.GetKey
@@ -1174,22 +1190,24 @@ function bind_clib()
     end)
   end
 
-  cbs.windowposfun       = ffi.typeof('GLFWwindowposfun')
-  cbs.windowsizefun      = ffi.typeof('GLFWwindowsizefun')
-  cbs.windowclosefun     = ffi.typeof('GLFWwindowclosefun')
-  cbs.windowrefreshfun   = ffi.typeof('GLFWwindowrefreshfun')
-  cbs.windowfocusfun     = ffi.typeof('GLFWwindowfocusfun')
-  cbs.windowiconifyfun   = ffi.typeof('GLFWwindowiconifyfun')
-  cbs.framebuffersizefun = ffi.typeof('GLFWframebuffersizefun')
-  cbs.mousebuttonfun     = ffi.typeof('GLFWmousebuttonfun')
-  cbs.cursorposfun       = ffi.typeof('GLFWcursorposfun')
-  cbs.cursorenterfun     = ffi.typeof('GLFWcursorenterfun')
-  cbs.scrollfun          = ffi.typeof('GLFWscrollfun')
-  cbs.keyfun             = ffi.typeof('GLFWkeyfun')
-  cbs.charfun            = ffi.typeof('GLFWcharfun')
-  cbs.charmodsfun        = ffi.typeof('GLFWcharmodsfun')
-  cbs.monitorfun         = ffi.typeof('GLFWmonitorfun')
-  cbs.joystickfun        = ffi.typeof('GLFWjoystickfun')
+  cbs.windowposfun          = ffi.typeof('GLFWwindowposfun')
+  cbs.windowsizefun         = ffi.typeof('GLFWwindowsizefun')
+  cbs.windowclosefun        = ffi.typeof('GLFWwindowclosefun')
+  cbs.windowrefreshfun      = ffi.typeof('GLFWwindowrefreshfun')
+  cbs.windowfocusfun        = ffi.typeof('GLFWwindowfocusfun')
+  cbs.windowiconifyfun      = ffi.typeof('GLFWwindowiconifyfun')
+  cbs.windowmaximizefun     = ffi.typeof('GLFWwindowmaximizefun')
+  cbs.framebuffersizefun    = ffi.typeof('GLFWframebuffersizefun')
+  cbs.windowcontentscalefun = ffi.typeof('GLFWwindowcontentscalefun')
+  cbs.mousebuttonfun        = ffi.typeof('GLFWmousebuttonfun')
+  cbs.cursorposfun          = ffi.typeof('GLFWcursorposfun')
+  cbs.cursorenterfun        = ffi.typeof('GLFWcursorenterfun')
+  cbs.scrollfun             = ffi.typeof('GLFWscrollfun')
+  cbs.keyfun                = ffi.typeof('GLFWkeyfun')
+  cbs.charfun               = ffi.typeof('GLFWcharfun')
+  cbs.charmodsfun           = ffi.typeof('GLFWcharmodsfun')
+  cbs.monitorfun            = ffi.typeof('GLFWmonitorfun')
+  cbs.joystickfun           = ffi.typeof('GLFWjoystickfun')
 end
 
 -----------------------------------------------------------
