@@ -37,7 +37,7 @@ local aux = {} -- Auxiliary utils
 local args -- Arguments for binding
 local clib -- C library namespace
 
-local is_luajit = pcall(require, 'jit')
+local is_luajit, jit = pcall(require, 'jit')
 
 
 local load_clib, bind_clib -- Forward declaration
@@ -1273,7 +1273,6 @@ function bind_clib()
     -- Luajit does not allow to call Lua-callbacks
     -- from JIT-compiled C-functions, so we
     -- manually turn off JIT for them
-    local is_luajit, jit = pcall(require, 'jit')
     if is_luajit then
       jit.off(funcs.PollEvents)
       jit.off(funcs.WaitEvents)
@@ -1474,20 +1473,8 @@ function aux.set_mt_method(t,k,v)
   end
 end
 
-if is_luajit then
-  -- LuaJIT way to compare with NULL
-  function aux.is_null(ptr)
-    return ptr == nil
-  end
-else
-  -- LuaFFI way to compare with NULL
-  function aux.is_null(ptr)
-    return ptr == ffi.C.NULL
-  end
-end
-
 function aux.string_or_nil(cstr)
-  if not aux.is_null(cstr) then
+  if cstr ~= const.NULL then
     return ffi.string(cstr)
   end
   return nil
