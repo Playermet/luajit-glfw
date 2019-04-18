@@ -432,6 +432,7 @@ function bind_clib()
     GLFWmonitor* glfwGetPrimaryMonitor(void);
     void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
     void glfwGetMonitorPhysicalSize(GLFWmonitor* monitor, int* widthMM, int* heightMM);
+    void glfwGetMonitorContentScale(GLFWmonitor* monitor, float* xscale, float* yscale);
     const char* glfwGetMonitorName(GLFWmonitor* monitor);
     GLFWmonitorfun glfwSetMonitorCallback(GLFWmonitorfun cbfun);
     const GLFWvidmode* glfwGetVideoModes(GLFWmonitor* monitor, int* count);
@@ -455,6 +456,7 @@ function bind_clib()
     void glfwSetWindowSize(GLFWwindow* window, int width, int height);
     void glfwGetFramebufferSize(GLFWwindow* window, int* width, int* height);
     void glfwGetWindowFrameSize(GLFWwindow* window, int* left, int* top, int* right, int* bottom);
+    void glfwGetWindowContentScale(GLFWwindow* window, float* xscale, float* yscale);
     void glfwIconifyWindow(GLFWwindow* window);
     void glfwRestoreWindow(GLFWwindow* window);
     void glfwMaximizeWindow(GLFWwindow* window);
@@ -601,6 +603,15 @@ function bind_clib()
     clib.glfwGetMonitorPhysicalSize(monitor, width, height)
 
     return width[0], height[0]
+  end
+
+  function funcs.GetMonitorContentScale(monitor)
+    local xscale = ffi.new('float[1]')
+    local yscale = ffi.new('float[1]')
+
+    clib.glfwGetMonitorContentScale(monitor, xscale, yscale)
+
+    return xscale[0], yscale[0]
   end
 
   function funcs.GetMonitorName(monitor)
@@ -754,6 +765,15 @@ function bind_clib()
     out.bottom = bottom[0]
 
     return out
+  end
+
+  function funcs.GetWindowContentScale(window)
+    local xscale = ffi.new('float[1]')
+    local yscale = ffi.new('float[1]')
+
+    clib.glfwGetWindowContentScale(window, xscale, yscale)
+
+    return xscale[0], yscale[0]
   end
 
   function funcs.IconifyWindow(window)
@@ -1106,6 +1126,7 @@ function bind_clib()
   local monitor_mt           = aux.class()
   monitor_mt.GetPos          = funcs.GetMonitorPos
   monitor_mt.GetPhysicalSize = funcs.GetMonitorPhysicalSize
+  monitor_mt.GetContentScale = funcs.GetMonitorContentScale
   monitor_mt.GetName         = funcs.GetMonitorName
   monitor_mt.GetVideoModes   = funcs.GetVideoModes
   monitor_mt.GetVideoMode    = funcs.GetVideoMode
@@ -1127,6 +1148,7 @@ function bind_clib()
   window_mt.SetSize                    = funcs.SetWindowSize
   window_mt.GetFramebufferSize         = funcs.GetFramebufferSize
   window_mt.GetFrameSize               = funcs.GetWindowFrameSize
+  window_mt.GetContentScale            = funcs.GetWindowContentScale
   window_mt.Iconify                    = funcs.IconifyWindow
   window_mt.Restore                    = funcs.RestoreWindow
   window_mt.Maximize                   = funcs.MaximizeWindow
