@@ -29,6 +29,7 @@
 ]]
 
 local ffi = require 'ffi'
+local bit = require 'bit'
 
 local mod = {} -- Lua module namespace
 local aux = {} -- Auxiliary utils
@@ -110,6 +111,16 @@ function bind_clib()
   const.RELEASE = 0
   const.PRESS   = 1
   const.REPEAT  = 2
+
+  const.HAT_CENTERED   = 0
+  const.HAT_UP         = 1
+  const.HAT_RIGHT      = 2
+  const.HAT_DOWN       = 4
+  const.HAT_LEFT       = 8
+  const.HAT_RIGHT_UP   = bit.bor(const.HAT_RIGHT, const.HAT_UP)
+  const.HAT_RIGHT_DOWN = bit.bor(const.HAT_RIGHT, const.HAT_DOWN)
+  const.HAT_LEFT_UP    = bit.bor(const.HAT_LEFT,  const.HAT_UP)
+  const.HAT_LEFT_DOWN  = bit.bor(const.HAT_LEFT,  const.HAT_DOWN)
 
   const.KEY_UNKNOWN = -1
 
@@ -237,10 +248,12 @@ function bind_clib()
 
   const.KEY_LAST          = const.KEY_MENU
 
-  const.MOD_SHIFT   = 0x0001
-  const.MOD_CONTROL = 0x0002
-  const.MOD_ALT     = 0x0004
-  const.MOD_SUPER   = 0x0008
+  const.MOD_SHIFT     = 0x0001
+  const.MOD_CONTROL   = 0x0002
+  const.MOD_ALT       = 0x0004
+  const.MOD_SUPER     = 0x0008
+  const.MOD_CAPS_LOCK = 0x0010
+  const.MOD_NUM_LOCK  = 0x0020
 
   const.MOUSE_BUTTON_1      = 0
   const.MOUSE_BUTTON_2      = 1
@@ -272,6 +285,38 @@ function bind_clib()
   const.JOYSTICK_15   = 14
   const.JOYSTICK_16   = 15
   const.JOYSTICK_LAST = const.JOYSTICK_16
+
+  const.GAMEPAD_BUTTON_A            = 0
+  const.GAMEPAD_BUTTON_B            = 1
+  const.GAMEPAD_BUTTON_X            = 2
+  const.GAMEPAD_BUTTON_Y            = 3
+  const.GAMEPAD_BUTTON_LEFT_BUMPER  = 4
+  const.GAMEPAD_BUTTON_RIGHT_BUMPER = 5
+  const.GAMEPAD_BUTTON_BACK         = 6
+  const.GAMEPAD_BUTTON_START        = 7
+  const.GAMEPAD_BUTTON_GUIDE        = 8
+  const.GAMEPAD_BUTTON_LEFT_THUMB   = 9
+  const.GAMEPAD_BUTTON_RIGHT_THUMB  = 10
+  const.GAMEPAD_BUTTON_DPAD_UP      = 11
+  const.GAMEPAD_BUTTON_DPAD_RIGHT   = 12
+  const.GAMEPAD_BUTTON_DPAD_DOWN    = 13
+  const.GAMEPAD_BUTTON_DPAD_LEFT    = 14
+  const.GAMEPAD_BUTTON_LAST         = const.GAMEPAD_BUTTON_DPAD_LEFT
+
+  const.GAMEPAD_BUTTON_CROSS    = const.GAMEPAD_BUTTON_A
+  const.GAMEPAD_BUTTON_CIRCLE   = const.GAMEPAD_BUTTON_B
+  const.GAMEPAD_BUTTON_SQUARE   = const.GAMEPAD_BUTTON_X
+  const.GAMEPAD_BUTTON_TRIANGLE = const.GAMEPAD_BUTTON_Y
+
+  const.GAMEPAD_AXIS_LEFT_X        = 0
+  const.GAMEPAD_AXIS_LEFT_Y        = 1
+  const.GAMEPAD_AXIS_RIGHT_X       = 2
+  const.GAMEPAD_AXIS_RIGHT_Y       = 3
+  const.GAMEPAD_AXIS_LEFT_TRIGGER  = 4
+  const.GAMEPAD_AXIS_RIGHT_TRIGGER = 5
+  const.GAMEPAD_AXIS_LAST          = const.GAMEPAD_AXIS_RIGHT_TRIGGER
+
+  const.NO_ERROR = 0
 
   const.NOT_INITIALIZED     = 0x00010001
   const.NO_CURRENT_CONTEXT  = 0x00010002
@@ -372,6 +417,10 @@ function bind_clib()
   const.CONNECTED    = 0x00040001
   const.DISCONNECTED = 0x00040002
 
+  const.JOYSTICK_HAT_BUTTONS  = 0x00050001
+  const.COCOA_CHDIR_RESOURCES = 0x00051001
+  const.COCOA_MENUBAR         = 0x00051002
+
   const.DONT_CARE = -1
 
   if not is_luajit then
@@ -434,6 +483,12 @@ function bind_clib()
       int height;
       unsigned char* pixels;
     } GLFWimage;
+
+    typedef struct GLFWgamepadstate
+    {
+      unsigned char buttons[15];
+      float axes[6];
+    } GLFWgamepadstate;
 
     int glfwInit(void);
     void glfwTerminate(void);
@@ -524,11 +579,19 @@ function bind_clib()
     GLFWcursorenterfun glfwSetCursorEnterCallback(GLFWwindow* window, GLFWcursorenterfun cbfun);
     GLFWscrollfun glfwSetScrollCallback(GLFWwindow* window, GLFWscrollfun cbfun);
     GLFWdropfun glfwSetDropCallback(GLFWwindow* window, GLFWdropfun cbfun);
-    int glfwJoystickPresent(int joy);
-    const float* glfwGetJoystickAxes(int joy, int* count);
-    const unsigned char* glfwGetJoystickButtons(int joy, int* count);
-    const char* glfwGetJoystickName(int joy);
+    int glfwJoystickPresent(int jid);
+    const float* glfwGetJoystickAxes(int jid, int* count);
+    const unsigned char* glfwGetJoystickButtons(int jid, int* count);
+    const unsigned char* glfwGetJoystickHats(int jid, int* count);
+    const char* glfwGetJoystickName(int jid);
+    const char* glfwGetJoystickGUID(int jid);
+    void glfwSetJoystickUserPointer(int jid, void* pointer);
+    void* glfwGetJoystickUserPointer(int jid);
+    int glfwJoystickIsGamepad(int jid);
     GLFWjoystickfun glfwSetJoystickCallback(GLFWjoystickfun cbfun);
+    int glfwUpdateGamepadMappings(const char* string);
+    const char* glfwGetGamepadName(int jid);
+    int glfwGetGamepadState(int jid, GLFWgamepadstate* state);
     void glfwSetClipboardString(GLFWwindow* window, const char* string);
     const char* glfwGetClipboardString(GLFWwindow* window);
     double glfwGetTime(void);
@@ -1051,13 +1114,13 @@ function bind_clib()
     return clib.glfwSetDropCallback(window, cbfun)
   end
 
-  function funcs.JoystickPresent(joy)
-    return clib.glfwJoystickPresent(aux.get_const(const, joy))
+  function funcs.JoystickPresent(jid)
+    return clib.glfwJoystickPresent(aux.get_const(const, jid))
   end
 
-  function funcs.GetJoystickAxes(joy, axes)
+  function funcs.GetJoystickAxes(jid, axes)
     local count = ffi.new('int[1]')
-    local caxes = clib.glfwGetJoystickAxes(aux.get_const(const, joy), count)
+    local caxes = clib.glfwGetJoystickAxes(aux.get_const(const, jid), count)
 
     axes = axes or {}
     for i = 1, count do
@@ -1067,9 +1130,9 @@ function bind_clib()
     return axes
   end
 
-  function funcs.GetJoystickButtons(joy, buttons)
+  function funcs.GetJoystickButtons(jid, buttons)
     local count = ffi.new('int[1]')
-    local cbuttons = clib.glfwGetJoystickButtons(aux.get_const(const, joy), count)
+    local cbuttons = clib.glfwGetJoystickButtons(aux.get_const(const, jid), count)
 
     buttons = buttons or {}
     for i = 1, count do
@@ -1079,13 +1142,53 @@ function bind_clib()
     return buttons
   end
 
-  function funcs.GetJoystickName(joy)
-    return aux.string_or_nil(clib.glfwGetJoystickName(aux.get_const(const, joy)))
+  function funcs.GetJoystickHats(jid, hats)
+    local count = ffi.new('int[1]')
+    local chats = clib.glfwGetJoystickHats(aux.get_const(const, jid), count)
+
+    hats = hats or {}
+    for i = 1, count do
+      hats[i] = chats[i - 1]
+    end
+
+    return hats
+  end
+
+  function funcs.GetJoystickName(jid)
+    return aux.string_or_nil(clib.glfwGetJoystickName(aux.get_const(const, jid)))
+  end
+
+  function funcs.GetJoystickGUID(jid)
+    return aux.string_or_nil(clib.glfwGetJoystickGUID(aux.get_const(const, jid)))
+  end
+
+  function funcs.SetJoystickUserPointer(jid, pointer)
+    clib.glfwSetJoystickUserPointer(aux.get_const(const, jid), pointer)
+  end
+
+  function funcs.GetJoystickUserPointer(jid)
+    return clib.glfwGetJoystickUserPointer(aux.get_const(const, jid))
+  end
+
+  function funcs.JoystickIsGamepad(jid)
+    return clib.glfwJoystickIsGamepad(aux.get_const(const, jid))
   end
 
   function funcs.SetJoystickCallback(cbfun)
     cbfun = aux.wrap_cb(cbs, cbfun, 'joystickfun')
     return clib.glfwSetJoystickCallback(cbfun)
+  end
+
+  function funcs.UpdateGamepadMappings(string)
+    return clib.glfwUpdateGamepadMappings(string)
+  end
+
+  function funcs.GetGamepadName(jid)
+    return aux.string_or_nil(clib.glfwGetGamepadName(aux.get_const(const, jid)))
+  end
+
+  function funcs.GetGamepadState(jid, state)
+    return clib.glfwGetGamepadState(aux.get_const(const, jid), state)
   end
 
   function funcs.SetClipboardString(window, string)
@@ -1284,7 +1387,8 @@ function bind_clib()
   ffi.metatype('GLFWwindow',  window_mt)
   ffi.metatype('GLFWcursor',  cursor_mt)
 
-  types.image = ffi.typeof('GLFWimage')
+  types.image        = ffi.typeof('GLFWimage')
+  types.gamepadstate = ffi.typeof('GLFWgamepadstate')
 
   -----------------------------------------------------------
   --  Callbacks wrappers
