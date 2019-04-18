@@ -1153,8 +1153,8 @@ function bind_clib()
       return extensions
     end
 
-    function funcs.glfwGetInstanceProcAddress(instance, procname)
-      return clib.glfwVulkanSupported(instance, procname)
+    function funcs.GetInstanceProcAddress(instance, procname)
+      return clib.glfwGetInstanceProcAddress(instance, procname)
     end
 
     function funcs.GetPhysicalDevicePresentationSupport(instance, device, queuefamily)
