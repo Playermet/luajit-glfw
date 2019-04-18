@@ -1,5 +1,5 @@
 # Features
- - Full support of 3.2.0 API (except native functions)
+ - Full support of 3.3.0 API (except native functions)
  - Supports both Luajit and Lua with luaffi
  - Additional OO style for monitors, windows, and cursors
 ```lua

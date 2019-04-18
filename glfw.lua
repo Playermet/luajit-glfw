@@ -1,5 +1,5 @@
 -----------------------------------------------------------
---  Binding for GLFW v3.2.0
+--  Binding for GLFW v3.3.0
 -----------------------------------------------------------
 
 --[[ LICENSE
@@ -102,7 +102,7 @@ function bind_clib()
   --  Constants
   -----------------------------------------------------------
   const.VERSION_MAJOR    = 3
-  const.VERSION_MINOR    = 2
+  const.VERSION_MINOR    = 3
   const.VERSION_REVISION = 0
 
   const.TRUE  = 1
