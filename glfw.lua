@@ -426,6 +426,7 @@ function bind_clib()
     void glfwTerminate(void);
     void glfwGetVersion(int* major, int* minor, int* rev);
     const char* glfwGetVersionString(void);
+    int glfwGetError(const char** description);
     GLFWerrorfun glfwSetErrorCallback(GLFWerrorfun cbfun);
     GLFWmonitor** glfwGetMonitors(int* count);
     GLFWmonitor* glfwGetPrimaryMonitor(void);
@@ -555,6 +556,12 @@ function bind_clib()
 
   function funcs.GetVersionString()
     return ffi.string(clib.glfwGetVersionString())
+  end
+
+  function funcs.GetError()
+    local description = ffi.new('char*[1]')
+    local err = clib.glfwGetError(description)
+    return err, ffi.string(description[0])
   end
 
   function funcs.SetErrorCallback(cbfun)
