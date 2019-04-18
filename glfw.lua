@@ -723,7 +723,7 @@ function bind_clib()
   end
 
   function funcs.GetMonitorName(monitor)
-    return aux.string_or_nil(clib.glfwGetMonitorName(monitor))
+    return aux.string_or_nil(const, clib.glfwGetMonitorName(monitor))
   end
 
   function funcs.SetMonitorUserPointer(monitor, pointer)
@@ -1030,7 +1030,7 @@ function bind_clib()
   end
 
   function funcs.GetKeyName(key, scancode)
-    return aux.string_or_nil(clib.glfwGetKeyName(key, scancode))
+    return aux.string_or_nil(const, clib.glfwGetKeyName(key, scancode))
   end
 
   function funcs.GetKeyScancode(key)
@@ -1155,11 +1155,11 @@ function bind_clib()
   end
 
   function funcs.GetJoystickName(jid)
-    return aux.string_or_nil(clib.glfwGetJoystickName(aux.get_const(const, jid)))
+    return aux.string_or_nil(const, clib.glfwGetJoystickName(aux.get_const(const, jid)))
   end
 
   function funcs.GetJoystickGUID(jid)
-    return aux.string_or_nil(clib.glfwGetJoystickGUID(aux.get_const(const, jid)))
+    return aux.string_or_nil(const, clib.glfwGetJoystickGUID(aux.get_const(const, jid)))
   end
 
   function funcs.SetJoystickUserPointer(jid, pointer)
@@ -1184,7 +1184,7 @@ function bind_clib()
   end
 
   function funcs.GetGamepadName(jid)
-    return aux.string_or_nil(clib.glfwGetGamepadName(aux.get_const(const, jid)))
+    return aux.string_or_nil(const, clib.glfwGetGamepadName(aux.get_const(const, jid)))
   end
 
   function funcs.GetGamepadState(jid, state)
@@ -1196,7 +1196,7 @@ function bind_clib()
   end
 
   function funcs.GetClipboardString(window)
-    return aux.string_or_nil(clib.glfwGetClipboardString(window))
+    return aux.string_or_nil(const, clib.glfwGetClipboardString(window))
   end
 
   function funcs.GetTime()
@@ -1473,7 +1473,7 @@ function aux.set_mt_method(t,k,v)
   end
 end
 
-function aux.string_or_nil(cstr)
+function aux.string_or_nil(const, cstr)
   if cstr ~= const.NULL then
     return ffi.string(cstr)
   end
